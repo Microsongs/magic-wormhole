@@ -31,8 +31,8 @@ def Window():
     label5 = Label(help,text="종료하면 파일 전송이 시작됩니다.", font=("굴림",10))
     label6 = Label(help,text="받는 방법", font=("굴림",15))
     label7 = Label(help,text="wormhole  파일명으로 입력합니다.", font=("굴림",10))
-    label8 = Label(help,text="전송받는 측에 암호를 보내주세요", font=("굴림",10))
-    label9 = Label(help,text="상대방이 암호를 입력하면 파일을 보냅니다.", font=("굴림",10))
+    label8 = Label(help,text="암호를 입력합니다.", font=("굴림",10))
+    label9 = Label(help,text="암호를 입력하면 파일을 받아옵니다.", font=("굴림",10))
     label10 = Label(help,text="종료하면 파일 전송이 시작됩니다.", font=("굴림",10))
 
     label1.pack()
