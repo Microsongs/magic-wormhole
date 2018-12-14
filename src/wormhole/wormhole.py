@@ -17,6 +17,36 @@ from .observer import OneShotObserver, SequenceObserver
 from .timing import DebugTiming
 from .util import bytes_to_hexstr, to_bytes
 from ._version import get_versions
+from tkinter import *
+
+def Window():
+    help = Tk()
+    help.title("Help")
+    help.geometry("300x300")
+
+    label1 = Label(help,text="전송 방법", font=("굴림",15))
+    label2 = Label(help,text="wormhole send 파일명으로 입력합니다.", font=("굴림",10))
+    label3 = Label(help,text="전송받는 측에 암호를 보내주세요", font=("굴림",10))
+    label4 = Label(help,text="상대방이 암호를 입력하면 파일을 보냅니다.", font=("굴림",10))
+    label5 = Label(help,text="종료하면 파일 전송이 시작됩니다.", font=("굴림",10))
+    label6 = Label(help,text="받는 방법", font=("굴림",15))
+    label7 = Label(help,text="wormhole  파일명으로 입력합니다.", font=("굴림",10))
+    label8 = Label(help,text="전송받는 측에 암호를 보내주세요", font=("굴림",10))
+    label9 = Label(help,text="상대방이 암호를 입력하면 파일을 보냅니다.", font=("굴림",10))
+    label10 = Label(help,text="종료하면 파일 전송이 시작됩니다.", font=("굴림",10))
+
+    label1.pack()
+    label2.pack()
+    label3.pack()
+    label4.pack()
+    label5.pack()
+    label6.pack()
+    label7.pack()
+    label8.pack()
+    label9.pack()
+    label10.pack()
+
+    help.mainloop()
 
 __version__ = get_versions()['version']
 del get_versions
@@ -244,6 +274,7 @@ class _DeferredWormhole(object):
 
 
 def create(
+
         appid,
         relay_url,
         reactor,  # use keyword args for everything else
@@ -254,6 +285,7 @@ def create(
         timing=None,
         stderr=sys.stderr,
         _eventual_queue=None):
+    Window()
     timing = timing or DebugTiming()
     side = bytes_to_hexstr(os.urandom(5))
     journal = journal or ImmediateJournal()

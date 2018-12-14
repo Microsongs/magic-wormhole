@@ -105,7 +105,7 @@ class Sender:
         offer, self._fd_to_send = self._build_offer()
         args = self._args
 
-        other_cmd = u"wormhole receive"
+        other_cmd = u"웜홀이 암호를 보냅니다."
         if args.verify:
             other_cmd = u"wormhole receive --verify"
         if args.zeromode:
@@ -120,9 +120,9 @@ class Sender:
 
         code = yield w.get_code()
         if not args.zeromode:
-            print(u"Wormhole code is: %s" % code, file=args.stderr)
+            print(u"웜홀 코드 : %s" % code, file=args.stderr)
             other_cmd += u" " + code
-        print(u"On the other computer, please run:", file=args.stderr)
+        print(u"다른 컴퓨터에서 웜홀 코드를 받아 실행하십시오 :", file=args.stderr)
         print(u"", file=args.stderr)
         print(other_cmd, file=args.stderr)
         print(u"", file=args.stderr)
@@ -236,11 +236,11 @@ class Sender:
             print(u"Reading text message from stdin..", file=args.stderr)
             text = sys.stdin.read()
         if not text and not args.what:
-            text = six.moves.input("Text to send: ")
+            text = six.moves.input("보낼 메세지를 입력하십시오: ")
 
         if text is not None:
             print(
-                u"Sending text message (%s)" % naturalsize(len(text)),
+                u"메세지를 보냅니다. (크기 : %s)" % naturalsize(len(text)),
                 file=args.stderr)
             offer = {"message": text}
             fd_to_send = None
@@ -303,14 +303,14 @@ class Sender:
                 "filesize": filesize,
             }
             print(
-                u"Sending %s file named '%s'" % (naturalsize(filesize),
+                u"파일을 보냅니다. (크기 : %s) 파일명: '%s'" % (naturalsize(filesize),
                                                  basename),
                 file=args.stderr)
             fd_to_send = open(what, "rb")
             return offer, fd_to_send
 
         if os.path.isdir(what):
-            print(u"Building zipfile..", file=args.stderr)
+            print(u"zipfile로 압축하는 중...", file=args.stderr)
             # We're sending a directory. Create a zipfile in a tempdir and
             # send that.
             fd_to_send = tempfile.SpooledTemporaryFile()
@@ -359,7 +359,7 @@ class Sender:
                 "numfiles": num_files,
             }
             print(
-                u"Sending directory (%s compressed) named '%s'" %
+                u"디렉토리를 보냅니다. (압축된 크기 : %s) 디렉토리명: '%s'" %
                 (naturalsize(filesize), basename),
                 file=args.stderr)
             return offer, fd_to_send
@@ -370,7 +370,7 @@ class Sender:
     def _handle_answer(self, them_answer):
         if self._fd_to_send is None:
             if them_answer["message_ack"] == "ok":
-                print(u"text message sent", file=self._args.stderr)
+                print(u"메세지를 보냈습니다.", file=self._args.stderr)
                 returnValue(None)  # terminates this function
             raise TransferError("error sending text: %r" % (them_answer, ))
 
@@ -382,6 +382,14 @@ class Sender:
 
     @inlineCallbacks
     def _send_file(self):
+
+        def _hide_ip(ip):
+            s = str(ip)
+            print(u"보내는 중... (",end='')
+            for i in range(len(s)):
+                  print('*',end='')
+            print(")..")
+
         ts = self._transit_sender
 
         self._fd_to_send.seek(0, 2)
@@ -392,7 +400,8 @@ class Sender:
         self._timing.add("transit connected")
         # record_pipe should implement IConsumer, chunks are just records
         stderr = self._args.stderr
-        print(u"Sending (%s).." % record_pipe.describe(), file=stderr)
+        # print(u"보내는 중 (%s).." % record_pipe.describe(), file=stderr)
+        _hide_ip(record_pipe)
 
         hasher = hashlib.sha256()
         progress = tqdm(
@@ -420,7 +429,7 @@ class Sender:
 
         expected_hash = hasher.digest()
         expected_hex = bytes_to_hexstr(expected_hash)
-        print(u"File sent.. waiting for confirmation", file=stderr)
+        print(u"파일을 보냈습니다.. 상대방의 확인을 기다려주세요", file=stderr)
         with self._timing.add("get ack") as t:
             ack_bytes = yield record_pipe.receive_record()
             record_pipe.close()
@@ -428,10 +437,10 @@ class Sender:
             ok = ack.get(u"ack", u"")
             if ok != u"ok":
                 t.detail(ack="failed")
-                raise TransferError("Transfer failed (remote says: %r)" % ack)
+                raise TransferError("전송 실패 (remote says: %r)" % ack)
             if u"sha256" in ack:
                 if ack[u"sha256"] != expected_hex:
                     t.detail(datahash="failed")
-                    raise TransferError("Transfer failed (bad remote hash)")
-            print(u"Confirmation received. Transfer complete.", file=stderr)
+                    raise TransferError("전송 실패 (bad remote hash)")
+            print(u"확인을 받았습니다. 전송 완료.", file=stderr)
             t.detail(ack="ok")

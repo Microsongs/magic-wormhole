@@ -128,7 +128,7 @@ class Receiver:
         yield self._handle_code(w)
 
         def on_slow_key():
-            print(u"Waiting for sender...", file=self.args.stderr)
+            print(u"보내는 사람을 기다리는 중 ...", file=self.args.stderr)
 
         notify = self._reactor.callLater(KEY_TIMER, on_slow_key)
         try:
@@ -214,12 +214,12 @@ class Receiver:
         if code:
             w.set_code(code)
         else:
-            prompt = "Enter receive wormhole code: "
+            prompt = "웜홀 코드를 입력하십시오: "
             used_completion = yield input_with_completion(
                 prompt, w.input_code(), self._reactor)
             if not used_completion:
                 print(
-                    " (note: you can use <Tab> to complete words)",
+                    " (안내: 단어를 완성하는데 <Tab>키를 사용할 수 있습니다.)",
                     file=self.args.stderr)
         yield w.get_code()
 
@@ -301,7 +301,7 @@ class Receiver:
                       (free, self.xfersize))
             raise TransferRejectedError()
 
-        self._msg(u"Receiving file (%s) into: %s" %
+        self._msg(u"보내온 파일 (크기: %s) 이름: %s" %
                   (naturalsize(self.xfersize),
                    os.path.basename(self.abs_destname)))
         self._ask_permission()
@@ -325,7 +325,7 @@ class Receiver:
                 (free, file_data["numbytes"]))
             raise TransferRejectedError()
 
-        self._msg(u"Receiving directory (%s) into: %s/" %
+        self._msg(u"보내온 디렉토리 (크기: %s) 이름: %s/" %
                   (naturalsize(self.xfersize),
                    os.path.basename(self.abs_destname)))
         self._msg(u"%d files, %s (uncompressed)" %
@@ -369,7 +369,7 @@ class Receiver:
     def _ask_permission(self):
         with self.args.timing.add("permission", waiting="user") as t:
             while True and not self.args.accept_file:
-                ok = six.moves.input("ok? (y/N): ")
+                ok = six.moves.input("다운받으시겠습니까? (y/N): ")
                 if ok.lower().startswith("y"):
                     if os.path.exists(self.abs_destname):
                         self._remove_existing(self.abs_destname)
@@ -391,7 +391,16 @@ class Receiver:
     @inlineCallbacks
     def _transfer_data(self, record_pipe, f):
         # now receive the rest of the owl
-        self._msg(u"Receiving (%s).." % record_pipe.describe())
+        def _hide_ip(ip):
+            s = str(ip)
+            print(u"받는중 ... (",end='')
+            for i in range(len(s)):
+                  print('*',end='')
+            print(")..")
+
+
+        _hide_ip(record_pipe)
+
 
         with self.args.timing.add("rx file"):
             progress = tqdm(
@@ -419,7 +428,7 @@ class Receiver:
         tmp_name = f.name
         f.close()
         os.rename(tmp_name, self.abs_destname)
-        self._msg(u"Received file written to %s" % os.path.basename(
+        self._msg(u"받는 파일: %s" % os.path.basename(
             self.abs_destname))
 
     def _extract_file(self, zf, info, extract_dir):
@@ -448,7 +457,7 @@ class Receiver:
                 for info in zf.infolist():
                     self._extract_file(zf, info, self.abs_destname)
 
-            self._msg(u"Received files written to %s/" % os.path.basename(
+            self._msg(u"받는 파일: %s/" % os.path.basename(
                 self.abs_destname))
             f.close()
 
